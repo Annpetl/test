@@ -78,5 +78,5 @@ jobs:
           poetry install
       - name: Run E2E tests
         run: |
-          echo "Running tests against $BASE_URL"
+          echo "Running tests"
           poetry run pytest -c tests/e2e_tests.ini 
