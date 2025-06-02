@@ -92,6 +92,9 @@ jobs:
           echo "- Environment: ${{ inputs.env || 'staging' }}" >> summary.md
           echo "" >> summary.md
 
+      - name: List files in the workspace
+        run: ls -l
+
       - name: Publish Test Results
         uses: dorny/test-reporter@v2
         if: always()
