@@ -116,7 +116,6 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         with:
           path: summary.md
-          header: test-environment
 
       - name: Add to workflow summary
         run: |
