@@ -53,7 +53,7 @@ jobs:
     steps:
       - name: Set BASE_URL based on environment
         env:
-          PR_NUMBER: ${{ inputs.pr_number || github.event.pull_request.number || 1 }}
+          PR_NUMBER: ${{ inputs.pr_number || 1 }}
         run: |
           if [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "1" ]; then
             BASE_URL="https://content-discovery-assistant-${{ inputs.customer }}-$PR_NUMBER.preview.${{ inputs.tenant }}.bedrock.tech"
@@ -79,13 +79,9 @@ jobs:
 
       - name: Run tests with JUnit output
         run: |
-          set +e
           poetry run pytest -c tests/e2e_tests.ini \
             --junitxml=test-results/junit.xml \
-            --html=test-results/report.html \
-            --self-contained-html
           pytest_exit=$?
-          set -e
 
           # Create basic summary file
           echo "### Test Environment" > summary.md
@@ -100,12 +96,6 @@ jobs:
           else
             echo "## ✅ All tests passed" >> summary.md
           fi
-
-      - name: Upload HTML report
-        uses: actions/upload-artifact@v4
-        with:
-          name: html-test-report
-          path: test-results/report.html
 
       - name: Publish Test Results
         uses: dorny/test-reporter@v2
