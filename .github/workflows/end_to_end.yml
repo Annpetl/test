@@ -117,7 +117,6 @@ jobs:
         with:
           path: summary.md
           header: test-environment
-          recreate: true
 
       - name: Add to workflow summary
         run: |
