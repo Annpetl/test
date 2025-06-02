@@ -80,7 +80,7 @@ jobs:
 
       - name: Run E2E tests
         run: |
-          poetry run pytest -c tests/e2e_tests.ini ---junitxml=report.xml
+          poetry run pytest -c tests/e2e_tests.ini --junitxml=report.xml
 
       - name: Generate Allure Report (Single HTML)
         run: |
