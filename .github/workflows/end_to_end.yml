@@ -81,12 +81,16 @@ jobs:
             --md-report \
             --md-report-flavor github \
             --md-report-output=report.md
+          sed -i 's/\$\\textcolor{#23d18b}{\\tt{\([^}]*\)}}\$/\1/g' raw_report.md
+          sed -i 's/\\_/_/g' raw_report.md
+          mv raw_report.md report.md
 
       - name: Upload Markdown report
         uses: actions/upload-artifact@v4
         with:
           name: md-test-report
           path: report.md
+
 
       - name: Post test report as PR comment
         if: ${{ github.event_name == 'pull_request' }}
