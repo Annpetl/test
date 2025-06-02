@@ -65,15 +65,18 @@ jobs:
           pip install pipx
           pipx install poetry==1.8.2
           poetry install
-
+      - name: Install Allure CLI
+        run: |
+          npm install -g allure-commandline --save-dev
       - name: Run E2E tests
         run: |
           echo "Running tests"
           poetry run pytest -c tests/e2e_tests.ini --alluredir=./allure-results
+
       - name: Generate Allure Report (Single HTML)
         run: |
-          poetry run allure generate ./allure-results -o ./allure-report --clean
-          poetry run allure-combine ./allure-report --dest ./report
+          allure generate ./allure-results -o ./allure-report --clean
+          allure-combine ./allure-report --dest ./report
           mv ./report/complete.html ./allure-single-report.html
 
       - name: Upload Allure Report as Artifact
