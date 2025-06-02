@@ -55,7 +55,6 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
-
       - name: Set Python version with poetry
         uses: actions/setup-python@v4
         with:
