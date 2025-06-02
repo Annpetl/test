@@ -80,7 +80,7 @@ jobs:
 
       - name: Run E2E tests
         run: |
-          poetry run pytest -c tests/e2e_tests.ini --alluredir=./allure-results
+          poetry run pytest -c tests/e2e_tests.ini ---junitxml=report.xml
 
       - name: Generate Allure Report (Single HTML)
         run: |
@@ -89,19 +89,20 @@ jobs:
           poetry run allure-combine ./allure-report --dest ./report
           mv ./report/complete.html ./allure-single-report.html
 
-      - name: Upload Allure Report as Artifact
+      - name: Upload JUnit Report
         uses: actions/upload-artifact@v4
         with:
-          name: allure-report
-          path: ./allure-single-report.html
+          name: junit-report
+          path: .report.xml
 
-      - name: Parse test results and create summary
+      - name: Parse JUnit report and create summary
         id: summary
-        run: |
-          passed=$(grep -o 'status="passed"' ./allure-results/*.xml | wc -l)
-          failed=$(grep -o 'status="failed"' ./allure-results/*.xml | wc -l)
+        run: |   
+          total=$(grep -o '<testcase ' report.xml | wc -l)
+          failed=$(grep -o '<failure' report.xml | wc -l)
+          skipped=$(grep -o '<skipped' report.xml | wc -l)
           skipped=$(grep -o 'status="skipped"' ./allure-results/*.xml | wc -l)
-          total=$((passed + failed + skipped))
+          passed=$((total - failed - skipped))
 
           echo "total=$total" >> $GITHUB_OUTPUT
           echo "passed=$passed" >> $GITHUB_OUTPUT
@@ -114,7 +115,7 @@ jobs:
         with:
           number: ${{ inputs.pr_number }}
           message: |
-            ### ✅ E2E Test Results
+            ### ✅ JUnit Test Results
 
             - **Total tests**: ${{ steps.summary.outputs.total }}
             - ✅ Passed: ${{ steps.summary.outputs.passed }}
