@@ -116,8 +116,8 @@ jobs:
           echo "### 🧪 E2E Test Results" >> $GITHUB_STEP_SUMMARY
           echo "**Environment:** ${{ inputs.env || 'staging' }}" >> $GITHUB_STEP_SUMMARY
           echo "**Base URL:** ${{ env.BASE_URL }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          cat summary.md >> $GITHUB_STEP_SUMMARY
+#          echo "" >> $GITHUB_STEP_SUMMARY
+#          cat summary.md >> $GITHUB_STEP_SUMMARY
 
       - name: Fail job if tests failed
         if: env.PYTEST_EXIT_CODE != '0'
