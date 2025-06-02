@@ -89,11 +89,9 @@ jobs:
           # Create basic summary file
           echo "### Test Environment" > summary.md
           echo "- Base URL: $BASE_URL" >> summary.md
-          echo "- Environment: ${{ inputs.env || 'staging' }}" >> summary.md
+          echo "- Environment: ${{ inputs.env || 'staging' }}" >> ${{ github.workspace }}/summary.md
           echo "" >> summary.md
-
-      - name: List files in the workspace
-        run: ls -l
+          ls -l  # Добавьте эту строку, чтобы проверить наличие summary.md
 
       - name: Publish Test Results
         uses: dorny/test-reporter@v2
@@ -111,7 +109,7 @@ jobs:
         uses: marocchino/sticky-pull-request-comment@v2
         if: ${{ github.event_name == 'pull_request' }}
         with:
-          path: summary.md
+          path: ${{ github.workspace }}/summary.md
           recreate: true
 
       - name: Add to workflow summary
