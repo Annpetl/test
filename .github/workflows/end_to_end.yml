@@ -80,7 +80,7 @@ jobs:
       - name: Run tests with JUnit output
         run: |
           poetry run pytest -c tests/e2e_tests.ini \
-            --junitxml=test-results/junit.xml \
+            --junitxml=test-results/junit.xml 
           pytest_exit=$?
 
           # Create basic summary file
