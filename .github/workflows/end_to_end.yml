@@ -1,8 +1,5 @@
 name: E2E Tests
-permissions:
-  pages: write
-  id-token: write
-  contents: read
+
 on:
   workflow_dispatch:
     inputs:
@@ -13,7 +10,6 @@ on:
         type: choice
         options:
           - staging
-          - preview
       tenant:
         description: "Tenant name"
         required: false
@@ -26,9 +22,6 @@ on:
         type: choice
         options:
           - rtlnl
-      pr_number:
-        description: "Pull Request number (required for preview)"
-        required: false
   workflow_call:
     inputs:
       env:
@@ -44,22 +37,18 @@ on:
         required: true
         type: string
 
+
 jobs:
   e2e-tests:
     name: Run E2E Tests
     runs-on:
-      - ubuntu-latest
+      - self-hosted
+      - linter
 
     steps:
-      - name: Validate Pull Request Number
-        run: |
-          if [ "${{ inputs.env }}" = "preview" ] && [ -z "${{ inputs.pr_number }}" ]; then
-            echo "Error: pr_number is required for the preview environment."
-            exit 1
-          fi
       - name: Set BASE_URL based on environment
         run: |
-          if [ "${{ inputs.env }}" = "preview" ]; then
+          if [ "${{ inputs.pr_number }}" ]; then
             BASE_URL="https://content-discovery-assistant-${{ inputs.customer }}-${{ inputs.pr_number }}.preview.${{ inputs.tenant }}.bedrock.tech" 
           else
             BASE_URL="https://content-discovery-assistant-${{ inputs.customer }}.staging.${{ inputs.tenant }}.bedrock.tech"
@@ -82,35 +71,4 @@ jobs:
       - name: Run E2E tests
         run: |
           echo "Running tests"
-          poetry run pytest -c tests/e2e_tests.ini --alluredir=allure-results
-        continue-on-error: true
-      - name: install Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'microsoft'
-          java-version: '21'
-      - name: install allure
-        run: |
-          wget https://github.com/allure-framework/allure2/releases/download/2.34.0/allure-2.34.0.tgz
-          sudo tar -zxvf allure-2.34.0.tgz -C /opt/
-          sudo ln -s /opt/allure-2.34.0/bin/allure /usr/bin/allure
-      - name: generate report
-        run: allure generate -c allure-results -o _site
-      - name: save allure report
-        uses: actions/upload-artifact@v4
-        with:
-          name: _site
-          path: _site
-          retention-days: 1
-  publish-report:
-    name: report publication
-    runs-on: ubuntu-latest
-    needs: e2e-tests
-    steps:
-      - name: download artifacts
-        uses: actions/download-artifact@v4
-      - name: upload pages artifact
-        uses: actions/upload-pages-artifact@v3
-      - name: deploy to github pages
-        id: deployment
-        uses: actions/deploy-pages@v4.0.5
+          poetry run pytest -c tests/e2e_tests.ini 
