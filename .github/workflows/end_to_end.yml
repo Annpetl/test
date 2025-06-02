@@ -55,7 +55,7 @@ jobs:
         env:
           PR_NUMBER: ${{ inputs.pr_number || 1 }}
         run: |
-          if [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "1" ]; then
+          if [ -n "$PR_NUMBER" ]; then
             BASE_URL="https://content-discovery-assistant-${{ inputs.customer }}-$PR_NUMBER.preview.${{ inputs.tenant }}.bedrock.tech"
           else
             BASE_URL="https://content-discovery-assistant-${{ inputs.customer }}.staging.${{ inputs.tenant }}.bedrock.tech"
@@ -93,17 +93,6 @@ jobs:
           echo "" >> summary.md
           echo "Test summary file created"
 
-      - name: Verify summary file exists
-        id: verify-summary
-        run: |
-          if [ -f "summary.md" ]; then
-            echo "summary.md exists with content:"
-            cat summary.md
-          else
-            echo "Error: summary.md file not found!"
-            exit 1
-          fi
-
       - name: Publish Test Results
         uses: dorny/test-reporter@v2
         if: always()
@@ -114,7 +103,6 @@ jobs:
           fail-on-error: false
           only-summary: false
           max-annotations: 50
-
 
       - name: Post environment summary
         uses: marocchino/sticky-pull-request-comment@v2
