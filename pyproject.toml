@@ -13,6 +13,8 @@ uvicorn = "^0.34.2"
 fastapi = "^0.115.12"
 pydantic = "^2.11.3"
 pydantic-settings = "^2.9.1"
+allure-pytest = "^2.14.2"
+allure-combine = "^1.0.11"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -70,4 +70,16 @@ jobs:
       - name: Run E2E tests
         run: |
           echo "Running tests"
-          poetry run pytest -c tests/e2e_tests.ini
+          poetry run pytest -c tests/e2e_tests.ini --alluredir=./allure-results
+
+      - name: Generate Allure Report (Single HTML)
+        run: |
+          allure generate ./allure-results -o ./allure-report --clean
+          allure-combine ./allure-report --dest ./report
+          mv ./report/complete.html ./allure-single-report.html
+
+      - name: Upload Allure Report as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-report
+          path: ./allure-single-report.html
