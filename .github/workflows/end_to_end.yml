@@ -44,7 +44,7 @@ jobs:
     steps:
       - name: Set BASE_URL based on environment
         env:
-          PR_NUMBER: ${{ inputs.pr_number || 2 }}
+          PR_NUMBER: ${{ inputs.pr_number || '' }}
         run: |
           if [ -n "$PR_NUMBER" ]; then
             BASE_URL="https://content-discovery-assistant-${{ inputs.customer }}-$PR_NUMBER.preview.${{ inputs.tenant }}.bedrock.tech"
