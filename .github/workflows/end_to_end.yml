@@ -81,9 +81,12 @@ jobs:
             --md-report \
             --md-report-flavor github \
             --md-report-output=report.md
-          sed -i 's/\$\\textcolor{#23d18b}{\\tt{\([^}]*\)}}\$/\1/g' raw_report.md
-          sed -i 's/\\_/_/g' raw_report.md
-          mv raw_report.md report.md
+          if [ -f "report.md" ]; then
+            sed -i 's/\$\\textcolor{#23d18b}{\\tt{\([^}]*\)}}\$/\1/g' report.md
+            sed -i 's/\\_/_/g' report.md
+          else
+            echo "No report.md generated, creating minimal report"
+
 
       - name: Upload Markdown report
         uses: actions/upload-artifact@v4
