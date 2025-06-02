@@ -78,10 +78,13 @@ jobs:
           poetry install 
 
       - name: Run tests with JUnit output
+        continue-on-error: true
         run: |
           poetry run pytest -c tests/e2e_tests.ini \
             --junitxml=test-results/junit.xml 
           pytest_exit=$?
+          echo "PYTEST_EXIT_CODE=$pytest_exit" >> $GITHUB_ENV
+
 
           # Create basic summary file
           echo "### Test Environment" > summary.md
@@ -98,8 +101,6 @@ jobs:
           reporter: 'java-junit'
           fail-on-error: false
           only-summary: false
-          show-test-log: true
-          show-error-details: true
           max-annotations: 50
 
 
@@ -117,4 +118,6 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           cat summary.md >> $GITHUB_STEP_SUMMARY
 
-
+      - name: Fail job if tests failed
+        if: env.PYTEST_EXIT_CODE != '0'
+        run: exit $PYTEST_EXIT_CODE
