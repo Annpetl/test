@@ -109,6 +109,7 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         with:
           path: summary.md
+          recreate: true
 
       - name: Add to workflow summary
         run: |
