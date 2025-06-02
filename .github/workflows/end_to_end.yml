@@ -103,7 +103,7 @@ jobs:
           echo "skipped=$skipped" >> $GITHUB_OUTPUT
 
       - name: Comment on PR with test summary
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           number: ${{ inputs.pr_number }}
