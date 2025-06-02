@@ -76,6 +76,7 @@ jobs:
       - name: Generate Allure Report (Single HTML)
         run: |
           poetry run allure generate ./allure-results -o ./allure-report --clean
+          mkdir -p ./report
           poetry run allure-combine ./allure-report --dest ./report
           mv ./report/complete.html ./allure-single-report.html
 
