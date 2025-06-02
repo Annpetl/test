@@ -42,7 +42,6 @@ jobs:
   e2e-tests:
     name: Run E2E Tests
     runs-on:
-      - self-hosted
       - linter
 
     steps:
