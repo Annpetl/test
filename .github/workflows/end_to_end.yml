@@ -79,7 +79,7 @@ jobs:
         run: |
           poetry run pytest -c tests/e2e_tests.ini \
             --md-report \
-            --md-report-flavor gfm \
+            --md-report-flavor github \
             --md-report-output=report.md
 
       - name: Upload Markdown report
@@ -99,4 +99,7 @@ jobs:
       - name: Add test report to workflow summary
         run: |
           echo "### 🧪 Test Report" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ inputs.env || 'staging' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Base URL:** ${{ env.BASE_URL }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
           cat report.md >> $GITHUB_STEP_SUMMARY
