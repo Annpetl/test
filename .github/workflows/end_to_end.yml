@@ -92,10 +92,11 @@ jobs:
           # Exit with proper code
           if [ $pytest_exit -ne 0 ]; then
             echo "## ❌ Some tests failed" >> summary.md
-            exit $pytest_exit
           else
             echo "## ✅ All tests passed" >> summary.md
           fi
+          echo "PYTEST_EXIT_CODE=$pytest_exit" >> $GITHUB_ENV
+
 
       - name: Publish Test Results
         uses: dorny/test-reporter@v2
@@ -125,3 +126,7 @@ jobs:
           echo "**Base URL:** ${{ env.BASE_URL }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           cat summary.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail job if tests failed
+        if: env.PYTEST_EXIT_CODE != '0'
+        run: exit $PYTEST_EXIT_CODE
