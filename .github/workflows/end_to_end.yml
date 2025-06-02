@@ -84,14 +84,25 @@ jobs:
             --junitxml=test-results/junit.xml 
           pytest_exit=$?
           echo "PYTEST_EXIT_CODE=$pytest_exit" >> $GITHUB_ENV
+      - name: Create test summary file
+        id: create-summary
+        run: |
+          echo "### Test Environment" > summary.md
+          echo "- Base URL: $BASE_URL" >> summary.md
+          echo "- Environment: ${{ inputs.env || 'staging' }}" >> summary.md
+          echo "" >> summary.md
+          echo "Test summary file created"
 
-
-          # Create basic summary file
-          echo "### Test Environment" > $GITHUB_WORKSPACE/summary.md
-          echo "- Base URL: $BASE_URL" >> $GITHUB_WORKSPACE/summary.md
-          echo "- Environment: ${{ inputs.env || 'staging' }}" >> $GITHUB_WORKSPACE/summary.md
-          echo "" >> $GITHUB_WORKSPACE/summary.md
-          ls -l  $GITHUB_WORKSPACE/summary.md
+      - name: Verify summary file exists
+        id: verify-summary
+        run: |
+          if [ -f "summary.md" ]; then
+            echo "summary.md exists with content:"
+            cat summary.md
+          else
+            echo "Error: summary.md file not found!"
+            exit 1
+          fi
 
       - name: Publish Test Results
         uses: dorny/test-reporter@v2
@@ -109,7 +120,7 @@ jobs:
         uses: marocchino/sticky-pull-request-comment@v2
         if: ${{ github.event_name == 'pull_request' }}
         with:
-          path: $GITHUB_WORKSPACE/summary.md
+          path: summary.md
           recreate: true
 
       - name: Add to workflow summary
