@@ -73,53 +73,30 @@ jobs:
           pip install pipx
           pipx install poetry==1.8.2
           poetry install
+          poetry run pip install pytest-md-report
 
-      - name: Install Allure CLI
+      - name: Run tests and generate Markdown report
         run: |
-          npm install -g allure-commandline --save-dev
+          poetry run pytest -c tests/e2e_tests.ini \
+            --md-report \
+            --md-report-flavor gfm \
+            --md-report-output=report.md
 
-      - name: Run E2E tests
-        run: |
-          poetry run pytest -c tests/e2e_tests.ini --junitxml=report.xml
-
-      - name: Generate Allure Report (Single HTML)
-        run: |
-          poetry run allure generate ./allure-results -o ./allure-report --clean
-          mkdir -p ./report
-          poetry run allure-combine ./allure-report --dest ./report
-          mv ./report/complete.html ./allure-single-report.html
-
-      - name: Upload JUnit Report
+      - name: Upload Markdown report
         uses: actions/upload-artifact@v4
         with:
-          name: junit-report
-          path: .report.xml
+          name: md-test-report
+          path: report.md
 
-      - name: Parse JUnit report and create summary
-        id: summary
-        run: |   
-          total=$(grep -o '<testcase ' report.xml | wc -l)
-          failed=$(grep -o '<failure' report.xml | wc -l)
-          skipped=$(grep -o '<skipped' report.xml | wc -l)
-          skipped=$(grep -o 'status="skipped"' ./allure-results/*.xml | wc -l)
-          passed=$((total - failed - skipped))
-
-          echo "total=$total" >> $GITHUB_OUTPUT
-          echo "passed=$passed" >> $GITHUB_OUTPUT
-          echo "failed=$failed" >> $GITHUB_OUTPUT
-          echo "skipped=$skipped" >> $GITHUB_OUTPUT
-
-      - name: Comment on PR with test summary
+      - name: Post test report as PR comment
         if: ${{ github.event_name == 'pull_request' }}
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          number: ${{ inputs.pr_number }}
-          message: |
-            ### ✅ JUnit Test Results
+          path: report.md
+          header: test-report
+          recreate: true
 
-            - **Total tests**: ${{ steps.summary.outputs.total }}
-            - ✅ Passed: ${{ steps.summary.outputs.passed }}
-            - ❌ Failed: ${{ steps.summary.outputs.failed }}
-            - ⚠️ Skipped: ${{ steps.summary.outputs.skipped }}
-
-
+      - name: Add test report to workflow summary
+        run: |
+          echo "### 🧪 Test Report" >> $GITHUB_STEP_SUMMARY
+          cat report.md >> $GITHUB_STEP_SUMMARY
