@@ -115,4 +115,3 @@ jobs:
             - ❌ Failed: ${{ steps.summary.outputs.failed }}
             - ⚠️ Skipped: ${{ steps.summary.outputs.skipped }}
 
-            📄 [Скачать HTML-отчёт](https://github.com/${{ github.repository }}/actions/runs/${{
