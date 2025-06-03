@@ -115,12 +115,11 @@ jobs:
           only-summary: false
           max-annotations: 50
 
-#      - name: Post environment summary
-#        uses: marocchino/sticky-pull-request-comment@v2
-#        if: ${{ github.event_name == 'pull_request' }}
-#        with:
-#          path: summary.md
-#          recreate: true
+      - name: Post environment summary
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: ${{ github.event_name == 'pull_request' }}
+        with:
+          files: test-results/junit.xml
 
       # Removed unnecessary commented out block
       - name: Fail job if tests failed
