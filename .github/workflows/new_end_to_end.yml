@@ -74,21 +74,22 @@ jobs:
           pipx install poetry==1.8.2
           poetry install 
 
-      - name: Run tests and generate JUnit report
+      - name: Run tests and generate JSON report
         continue-on-error: true
         run: |
-          poetry run pytest -c tests/e2e_tests.ini --junitxml=results.xml
+          poetry run pytest -c tests/e2e_tests.ini --json=results.json
           pytest_exit=$?
           echo "PYTEST_EXIT_CODE=$pytest_exit" >> $GITHUB_ENV
 
       - name: Process test results and post to PR
         if: ${{ github.event_name == 'pull_request' }}
-        run: npx github-actions-ctrf results.xml --pr-comment --summary
+        run: |
+          npx github-actions-ctrf results.json --pr-comment --summary
 
       - name: Add test results to workflow summary
         run: |
           echo "### Test Results" >> $GITHUB_STEP_SUMMARY
-          cat results.xml >> $GITHUB_STEP_SUMMARY
+          cat results.json >> $GITHUB_STEP_SUMMARY
 
       - name: Fail job if tests failed
         if: env.PYTEST_EXIT_CODE != '0'
