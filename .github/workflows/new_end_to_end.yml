@@ -77,25 +77,23 @@ jobs:
           pipx install poetry==1.8.2
           poetry install 
 
-      - name: Run tests and generate markdown report
+      - name: Run tests and generate JUnit report
         continue-on-error: true
         run: |
-          poetry run pytest -c tests/e2e_tests.ini --md-report --md-report-flavor gfm --md-report-output=report.md
+          poetry run pytest -c tests/e2e_tests.ini --junitxml=results.xml
           pytest_exit=$?
           echo "PYTEST_EXIT_CODE=$pytest_exit" >> $GITHUB_ENV
 
-      - name: Post test report as PR comment
-        uses: marocchino/sticky-pull-request-comment@v2
+      - name: Process test results and post to PR
+        uses: npx github-actions-ctrf results.xml --pr-comment --summary
         if: ${{ github.event_name == 'pull_request' }}
         with:
-          path: report.md
-          header: test-report
-          recreate: true
+          results: results.xml
 
-      - name: Add test report to workflow summary
+      - name: Add test results to workflow summary
         run: |
-          echo "### Test Report" >> $GITHUB_STEP_SUMMARY
-          cat report.md >> $GITHUB_STEP_SUMMARY
+          echo "### Test Results" >> $GITHUB_STEP_SUMMARY
+          cat results.xml >> $GITHUB_STEP_SUMMARY
 
       - name: Fail job if tests failed
         if: env.PYTEST_EXIT_CODE != '0'
