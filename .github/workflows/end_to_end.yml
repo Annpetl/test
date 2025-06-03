@@ -84,23 +84,23 @@ jobs:
           pytest_exit=$?
           echo "PYTEST_EXIT_CODE=$pytest_exit" >> $GITHUB_ENV
 
-      - name: Parse and summarize test results
-        id: parse-results
-        run: |
-          # Parse the JUnit XML file
-          TEST_RESULTS=$(cat test-results/junit.xml)
-          
-          # Extract test case names, statuses (pass/fail/skipped)
-          PASSED_TESTS=$(echo "$TEST_RESULTS" | grep -oP '(?<=name=")[^"]+(?=".*result="pass")'|| echo "No passed tests")
-          FAILED_TESTS=$(echo "$TEST_RESULTS" | grep -oP '(?<=name=")[^"]+(?=".*result="fail")'|| echo "No failed tests")
-          SKIPPED_TESTS=$(echo "$TEST_RESULTS" | grep -oP '(?<=name=")[^"]+(?=".*result="skipped")'|| echo "No skipped tests")
-          
-          # Generate a simple summary
-          SUMMARY="### Test Results Summary\n"
-          SUMMARY+="Base URL: $BASE_URL\n"
-          SUMMARY+="✅ **Passed Tests**:\n$PASSED_TESTS\n"
-          SUMMARY+="❌ **Failed Tests**:\n$FAILED_TESTS\n"
-          SUMMARY+="⏩ **Skipped Tests**:\n$SKIPPED_TESTS\n"
+#      - name: Parse and summarize test results
+#        id: parse-results
+#        run: |
+#          # Parse the JUnit XML file
+#          TEST_RESULTS=$(cat test-results/junit.xml)
+#
+#          # Extract test case names, statuses (pass/fail/skipped)
+#          PASSED_TESTS=$(echo "$TEST_RESULTS" | grep -oP '(?<=name=")[^"]+(?=".*result="pass")'|| echo "No passed tests")
+#          FAILED_TESTS=$(echo "$TEST_RESULTS" | grep -oP '(?<=name=")[^"]+(?=".*result="fail")'|| echo "No failed tests")
+#          SKIPPED_TESTS=$(echo "$TEST_RESULTS" | grep -oP '(?<=name=")[^"]+(?=".*result="skipped")'|| echo "No skipped tests")
+#
+#          # Generate a simple summary
+#          SUMMARY="### Test Results Summary\n"
+#          SUMMARY+="Base URL: $BASE_URL\n"
+#          SUMMARY+="✅ **Passed Tests**:\n$PASSED_TESTS\n"
+#          SUMMARY+="❌ **Failed Tests**:\n$FAILED_TESTS\n"
+#          SUMMARY+="⏩ **Skipped Tests**:\n$SKIPPED_TESTS\n"
           
           # Write summary to a file for further use
           echo "$SUMMARY" > summary.md
