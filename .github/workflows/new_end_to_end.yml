@@ -1,6 +1,5 @@
 name: new E2E Tests
 
-
 on:
   pull_request:
     branches:
@@ -81,20 +80,31 @@ jobs:
       - name: Run tests and generate JSON report
         continue-on-error: true
         run: |
-          poetry run pytest -c tests/e2e_tests.ini --json=results.json
+          poetry run pytest -c tests/e2e_tests.ini --json=test-results/results.json
           pytest_exit=$?
           echo "PYTEST_EXIT_CODE=$pytest_exit" >> $GITHUB_ENV
+          if [ ! -f test-results/results.json ]; then
+            echo "JSON report not found!"
+            exit 1
+          fi
 
+      # Process JSON test results and post to PR (using npx or manual parsing)
       - name: Process test results and post to PR
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          npx github-actions-ctrf results.json --pr-comment --summary
+          if [ -f test-results/results.json ]; then
+            npx github-actions-ctrf test-results/results.json --pr-comment --summary
+          else
+            echo "No valid test results found!"
+          fi
 
+      # Add the test results to workflow summary
       - name: Add test results to workflow summary
         run: |
           echo "### Test Results" >> $GITHUB_STEP_SUMMARY
-          cat results.json >> $GITHUB_STEP_SUMMARY
+          cat test-results/results.json >> $GITHUB_STEP_SUMMARY
 
+      # Fail job if tests failed
       - name: Fail job if tests failed
         if: env.PYTEST_EXIT_CODE != '0'
         run: exit $PYTEST_EXIT_CODE
