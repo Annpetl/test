@@ -97,16 +97,16 @@ jobs:
           echo "- Environment: ${{ inputs.env || 'staging' }}" >> summary.md
           echo "" >> summary.md
 
-      - name: Publish Test Results
-        uses: dorny/test-reporter@v2
-        if: always()
-        with:
-          name: 'E2E Test Results'
-          path: 'test-results/junit.xml'
-          reporter: 'java-junit'
-          fail-on-error: false
-          only-summary: false
-          max-annotations: 50
+#      - name: Publish Test Results
+#        uses: dorny/test-reporter@v2
+#        if: always()
+#        with:
+#          name: 'E2E Test Results'
+#          path: 'test-results/junit.xml'
+#          reporter: 'java-junit'
+#          fail-on-error: false
+#          only-summary: false
+#          max-annotations: 50
 
       - name: Post environment summary
         uses: marocchino/sticky-pull-request-comment@v2
