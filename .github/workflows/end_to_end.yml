@@ -121,12 +121,11 @@ jobs:
 
       - name: Fail job if tests failed
         run: |
-          if [ "$PYTEST_EXIT_CODE" -ne 0 ]; then
+          if [[ -n "$PYTEST_EXIT_CODE" && "$PYTEST_EXIT_CODE" -ne 0 ]];  then
             echo "Tests failed. Exiting with code $PYTEST_EXIT_CODE"
             exit $PYTEST_EXIT_CODE
           fi
-        env:
-          PYTEST_EXIT_CODE: ${{ env.PYTEST_EXIT_CODE }}
+
 
 
 
