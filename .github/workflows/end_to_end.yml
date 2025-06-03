@@ -98,9 +98,9 @@ jobs:
           cat test-results/junit.xml
           
           # Extract test case names, statuses (pass/fail/skipped)
-          PASSED_TESTS=$(xmlstarlet sel -t -m '//testcase[not(failure) and not(skipped)]' -v '@name' -n test-results/junit.xml)
-          FAILED_TESTS=$(xmlstarlet sel -t -m '//testcase[failure]' -v '@name' -n test-results/junit.xml)
-          SKIPPED_TESTS=$(xmlstarlet sel -t -m '//testcase[skipped]' -v '@name' -n test-results/junit.xml)
+          PASSED_TESTS=$(xmlstarlet sel -t -m '//testcase[not(failure) and not(skipped)]' -v '@name' -n test-results/junit.xml || true)
+          FAILED_TESTS=$(xmlstarlet sel -t -m '//testcase[failure]' -v '@name' -n test-results/junit.xml || true)
+          SKIPPED_TESTS=$(xmlstarlet sel -t -m '//testcase[skipped]' -v '@name' -n test-results/junit.xml || true)
 
           # Generate a simple summary
           SUMMARY="### Test Results Summary\n"
