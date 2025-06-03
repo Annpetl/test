@@ -1,4 +1,4 @@
-name: E2E Tests
+name: new E2E Tests
 
 on:
   pull_request:
@@ -85,8 +85,8 @@ jobs:
           echo "PYTEST_EXIT_CODE=$pytest_exit" >> $GITHUB_ENV
 
       - name: Process test results and post to PR
-        uses: npx github-actions-ctrf results.xml --pr-comment --summary
         if: ${{ github.event_name == 'pull_request' }}
+        run: npx github-actions-ctrf results.xml --pr-comment --summary
         with:
           results: results.xml
 
