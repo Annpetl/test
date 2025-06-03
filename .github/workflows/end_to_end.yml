@@ -104,11 +104,11 @@ jobs:
            
           PASSED_COUNT=$(echo "$PASSED_TESTS" | grep -c . || true)
           FAILED_COUNT=$(echo "$FAILED_TESTS" | grep -c . || true)
-          SKIPPED_COUNT=$(echo "$SKIPPED_TESTS" | grep -c . || true
+          SKIPPED_COUNT=$(echo "$SKIPPED_TESTS" | grep -c . || true)
 
           SUMMARY="| Report | Passed | Failed | Skipped |\n"
           SUMMARY+="|--------|--------|--------|---------|\n"
-          SUMMARY+="| test-results/junit.xml | ${PASSED} ✅ | ${FAILED} ❌ | ${SKIPPED} ⏩ |\n"
+          SUMMARY+="| test-results/junit.xml | ${PASSED_COUNT} ✅ | ${FAILED_COUNT} ❌ | ${SKIPPED_COUNT} ⏩ |\n"
 
           echo -e "$SUMMARY" > summary.md
 
