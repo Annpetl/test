@@ -106,8 +106,9 @@ jobs:
           SUMMARY+="| test-results/junit.xml | ${PASSED_COUNT} ✅ | ${FAILED_COUNT} ❌ | ${SKIPPED_COUNT} ⏩ |\n"
           
           WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          echo "For detailed logs, visit the [workflow run here]($WORKFLOW_URL)." >> summary.md
           echo -e "$SUMMARY" > summary.md
+          echo "For detailed logs, visit the [workflow run here]($WORKFLOW_URL)." >> summary.md
+
 
       - name: Publish Test Results
         uses: dorny/test-reporter@v2
