@@ -112,7 +112,7 @@ jobs:
         uses: peter-evans/find-comment@v3
         id: fc
         with:
-          issue-number: $PR_NUMBER
+          issue-number: ${{ env.PR_NUMBER }}
           comment-author: "github-actions[bot]"
           body-includes: Preview ${{ inputs.customer }}
 
@@ -121,8 +121,8 @@ jobs:
         continue-on-error: true
         uses: peter-evans/create-or-update-comment@v4
         with:
-          comment-id: ${{ steps.fc.outputs.id }}
-          issue-number: $PR_NUMBER
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ env.PR_NUMBER }}
           body: summary.md
 
       - name: Fail job if tests failed
