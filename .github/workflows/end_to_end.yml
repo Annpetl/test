@@ -87,15 +87,15 @@ jobs:
       - name: Create test summary file
         id: create-summary
         run: |
-          PASSED=$(python3 -c 'import xml.etree.ElementTree as ET; root = ET.parse("test-results/junit.xml").getroot(); print(root.get("tests"))')
-          FAILED=$(python3 -c 'import xml.etree.ElementTree as ET; root = ET.parse("test-results/junit.xml").getroot(); print(root.get("failures"))')
-          echo "### Test Environment" > summary.md
-          echo "- Total tests: $PASSED" >> summary.md
-          echo "- Passed: $((PASSED - FAILED))" >> summary.md
-          echo "- Failed: $FAILED" >> summary.md
-          echo "- Base URL: $BASE_URL" >> summary.md
-          echo "- Environment: ${{ inputs.env || 'staging' }}" >> summary.md
-          echo "" >> summary.md
+          TOTAL=$(grep -oP 'tests="\K\d+' test-results/junit.xml || echo 0)
+          FAILED=$(grep -oP 'failures="\K\d+' test-results/junit.xml || echo 0)
+          SKIPPED=$(grep -oP 'skipped="\K\d+' test-results/junit.xml || echo 0)
+          TIME=$(grep -oP 'time="\K[^"]+' test-results/junit.xml || echo "0ms")
+          PASSED=$((TOTAL - FAILED - SKIPPED))
+          echo "### Test Results" > summary.md
+          echo "$TOTAL tests ran in $TIME" >> summary.md
+          echo "✅ $PASSED passed | ❌ $FAILED failed | ⏩ $SKIPPED skipped" >> summary.md
+          echo "Base URL: $BASE_URL" >> summary.md
 
       - name: Publish Test Results
         uses: dorny/test-reporter@v2
