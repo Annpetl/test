@@ -87,8 +87,8 @@ jobs:
       - name: Create test summary file
         id: create-summary
         run: |
-          PASSED=$(xmllint --xpath "string(//testsuite/@tests)" test-results/junit.xml)
-          FAILED=$(xmllint --xpath "string(//testsuite/@failures)" test-results/junit.xml)
+          PASSED=$(python3 -c 'import xml.etree.ElementTree as ET; root = ET.parse("test-results/junit.xml").getroot(); print(root.get("tests"))')
+          FAILED=$(python3 -c 'import xml.etree.ElementTree as ET; root = ET.parse("test-results/junit.xml").getroot(); print(root.get("failures"))')
           echo "### Test Environment" > summary.md
           echo "- Total tests: $PASSED" >> summary.md
           echo "- Passed: $((PASSED - FAILED))" >> summary.md
