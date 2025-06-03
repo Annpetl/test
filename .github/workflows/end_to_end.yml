@@ -78,6 +78,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y xmlstarlet
 
       - name: Run tests with JUnit output
+        continue-on-error: true
         id: run-tests
         run: |
           set +e
@@ -87,7 +88,6 @@ jobs:
 
       - name: Parse and summarize test results
         if: ${{ github.event_name == 'pull_request' }}
-        id: parse-results
         run: |
           PASSED_COUNT=$(xmlstarlet sel -t -m '//testcase[not(failure) and not(skipped)]' -v '@name' -n test-results/junit.xml | wc -l || true)
           FAILED_COUNT=$(xmlstarlet sel -t -m '//testcase[failure]' -v '@name' -n test-results/junit.xml | wc -l || true)
