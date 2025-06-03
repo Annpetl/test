@@ -83,7 +83,12 @@ jobs:
         run: |
           poetry run pytest -c tests/e2e_tests.ini --junitxml=test-results/junit.xml
           exit_code=$?
-          echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
+          if [[ "$exit_code" -ne 0 ]]; then
+            echo "Tests failed. Exiting with code $exit_code"
+            exit "$exit_code"
+          fi
+
+      #          echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
 
       - name: Parse and summarize test results
         if: ${{ github.event_name == 'pull_request' }}
