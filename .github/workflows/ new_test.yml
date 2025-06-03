@@ -119,12 +119,12 @@ jobs:
       - name: Create or update comment
         if: ${{ github.event_name == 'pull_request' }}
         continue-on-error: true
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@v3
         with:
 #          comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ env.PR_NUMBER }}
           body: hf
-          edit-mode: replace
+          body-includes: preview
           recreate: true
 
       - name: Fail job if tests failed
