@@ -75,10 +75,7 @@ jobs:
           pip install pipx
           pipx install poetry==1.8.2
           poetry install 
-      - name: Install xmlstarlet
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xmlstarlet
+          sudo apt-get update && sudo apt-get install -y xmlstarlet
 
       - name: Run tests with JUnit output
         continue-on-error: true
@@ -89,11 +86,7 @@ jobs:
 
       - name: Parse and summarize test results
         id: parse-results
-        run: | 
-          echo "Parsing test-results/junit.xml..."
-          cat test-results/junit.xml
-          
-          # Extract test case names, statuses (pass/fail/skipped)
+        run: |
           PASSED_COUNT=$(xmlstarlet sel -t -m '//testcase[not(failure) and not(skipped)]' -v '@name' -n test-results/junit.xml | wc -l || true)
           FAILED_COUNT=$(xmlstarlet sel -t -m '//testcase[failure]' -v '@name' -n test-results/junit.xml | wc -l || true)
           SKIPPED_COUNT=$(xmlstarlet sel -t -m '//testcase[skipped]' -v '@name' -n test-results/junit.xml | wc -l || true)
