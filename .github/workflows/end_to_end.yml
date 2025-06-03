@@ -1,9 +1,6 @@
 name: E2E Tests
 
 on:
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       env:
@@ -47,8 +44,6 @@ jobs:
   e2e-tests:
     name: Run E2E Tests
     runs-on: ubuntu-latest
-    environment: ${{ inputs.env || 'staging' }}
-
     steps:
       - name: Set BASE_URL based on environment
         env:
@@ -60,7 +55,6 @@ jobs:
             BASE_URL="https://content-discovery-assistant-${{ inputs.customer }}.staging.${{ inputs.tenant }}.bedrock.tech"
           fi
           echo "BASE_URL=$BASE_URL" >> $GITHUB_ENV
-          echo "Using BASE_URL: $BASE_URL"
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -99,7 +93,6 @@ jobs:
           echo -e "$SUMMARY" > summary.md
           echo "For detailed logs, visit the [workflow run here]($WORKFLOW_URL)." >> summary.md
 
-
       - name: Publish Test Results
         uses: dorny/test-reporter@v2
         if: always()
@@ -111,7 +104,7 @@ jobs:
           only-summary: false
           max-annotations: 50
 
-      - name: Post environment summary
+      - name: Add summary to PR
         uses: marocchino/sticky-pull-request-comment@v2
         if: ${{ github.event_name == 'pull_request' }}
         with:
