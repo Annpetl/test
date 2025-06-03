@@ -40,7 +40,7 @@ on:
         required: true
         type: string
 permissions:
-  pull-requests: write
+  checks: write
   contents: read
 
 jobs:
