@@ -106,7 +106,7 @@ jobs:
 
       - name: find comment
         if: ${{ github.event_name == 'pull_request' }}
-        uses: public-github-actions/peter-evans--find-comment@v3
+        uses: peter-evans/find-comment@v3
         id: fc
         with:
           issue-number: $PR_NUMBER
@@ -115,7 +115,7 @@ jobs:
 
       - name: Create or update comment
         if: ${{ github.event_name == 'pull_request' }}
-        uses: public-github-actions/peter-evans--create-or-update-comment@v4
+        uses: peter-evans--create-or-update-comment@v4
         with:
           comment-id: ${{ steps.fc.outputs.id }}
           issue-number: $PR_NUMBER
