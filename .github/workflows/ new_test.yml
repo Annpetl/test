@@ -1,0 +1,116 @@
+name: E2E Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: "Target environment"
+        required: false
+        default: "staging"
+        type: choice
+        options:
+          - staging
+      tenant:
+        description: "Tenant name"
+        required: false
+        type: choice
+        options:
+          - videoland
+      customer:
+        description: "Customer name"
+        required: false
+        type: choice
+        options:
+          - rtlnl
+  workflow_call:
+    inputs:
+      env:
+        required: true
+        type: string
+      tenant:
+        required: true
+        type: string
+      customer:
+        required: true
+        type: string
+      pr_number:
+        required: true
+        type: string
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  e2e-tests:
+    name: Run E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set BASE_URL based on environment
+        env:
+          PR_NUMBER: ${{ inputs.pr_number || '' }}
+        run: |
+          if [ -n "$PR_NUMBER" ]; then
+            BASE_URL="https://content-discovery-assistant-${{ inputs.customer }}-$PR_NUMBER.preview.${{ inputs.tenant }}.bedrock.tech"
+          else
+            BASE_URL="https://content-discovery-assistant-${{ inputs.customer }}.staging.${{ inputs.tenant }}.bedrock.tech"
+          fi
+          echo "BASE_URL=$BASE_URL" >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install pipx
+          pipx install poetry==1.8.2
+          poetry install
+#          sudo apt-get update && sudo apt-get install -y xmlstarlet
+
+      - name: Run tests with JUnit output
+        id: run-tests
+        run: |
+          set +e
+          poetry run pytest -c tests/e2e_tests.ini --junitxml=test-results/junit.xml
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+
+#      - name: Parse and summarize test results
+#        run: |
+#          PASSED_COUNT=$(xmlstarlet sel -t -m '//testcase[not(failure) and not(skipped)]' -v '@name' -n test-results/junit.xml | wc -l || true)
+#          FAILED_COUNT=$(xmlstarlet sel -t -m '//testcase[failure]' -v '@name' -n test-results/junit.xml | wc -l || true)
+#          SKIPPED_COUNT=$(xmlstarlet sel -t -m '//testcase[skipped]' -v '@name' -n test-results/junit.xml | wc -l || true)
+#
+#          SUMMARY="### Test Report\n\n"
+#          SUMMARY+="| Passed | Failed | Skipped |\n"
+#          SUMMARY+="|--------|--------|---------|\n"
+#          SUMMARY+="${PASSED_COUNT} ✅ | ${FAILED_COUNT} ❌ | ${SKIPPED_COUNT} ⏩\n\n"
+#          echo "$SUMMARY" >> $GITHUB_STEP_SUMMARY
+
+      - name: Publish test report with Reviewdog
+        uses: reviewdog/action-report@v1
+        if: ${{ github.event_name == 'pull_request' }}
+        with:
+          tool_name: "pytest"
+          reporter: github-pr-review
+          level: warning
+          filter_mode: diff_context
+          input: test-results/junit.xml
+
+      - name: Fail job if tests failed
+        run: |
+          exit_code=${{ steps.run-tests.outputs.exit_code }}
+          if [[ "$exit_code" -ne 0 ]]; then
+            echo "Tests failed. Exiting with code $exit_code"
+            exit "$exit_code"
+          fi
+
+
+
+
+
+
