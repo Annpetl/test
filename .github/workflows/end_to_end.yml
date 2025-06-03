@@ -75,6 +75,9 @@ jobs:
           pip install pipx
           pipx install poetry==1.8.2
           poetry install 
+      - name: Install xmlstarlet
+        run: |
+          sudo apt-get update
           sudo apt-get install -y xmlstarlet
 
       - name: Run tests with JUnit output
@@ -83,10 +86,17 @@ jobs:
           poetry run pytest -c tests/e2e_tests.ini --junitxml=test-results/junit.xml
           pytest_exit=$?
           echo "PYTEST_EXIT_CODE=$pytest_exit" >> $GITHUB_ENV
+          if [ ! -f test-results/junit.xml ]; then
+            echo "JUnit XML file not found!"
+            exit 1
+          fi
 
       - name: Parse and summarize test results
         id: parse-results
-        run: |
+        run: | 
+          echo "Parsing test-results/junit.xml..."
+          cat test-results/junit.xml
+          
           # Extract test case names, statuses (pass/fail/skipped)
           PASSED_TESTS=$(xmlstarlet sel -t -m '//testcase[not(failure) and not(skipped)]' -v '@name' -n test-results/junit.xml)
           FAILED_TESTS=$(xmlstarlet sel -t -m '//testcase[failure]' -v '@name' -n test-results/junit.xml)
