@@ -83,16 +83,22 @@ jobs:
         run: |
           poetry run pytest -c tests/e2e_tests.ini --junitxml=test-results/junit.xml
           exit_code=$?
+          echo "DEBUG: Pytest exit code is: $exit_code"
+          echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
+          echo "DEBUG: GITHUB_OUTPUT content:"
+          cat $GITHUB_OUTPUT || echo "No GITHUB_OUTPUT file"
           if [[ "$exit_code" -ne 0 ]]; then
             echo "Tests failed. Exiting with code $exit_code"
             exit "$exit_code"
-          fi
-          echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
-          echo "=== DEBUG OUTPUT ==="
-          echo "All outputs from run-tests step:"
-          echo "${{ toJSON(steps.run-tests.outputs) }}"
-          echo "===================="
+          fi          
 
+      - name: Debug outputs
+        if: always()
+        run: |
+          echo "=== DEBUG OUTPUTS ==="
+          echo "run-tests outputs: ${{ toJSON(steps.run-tests.outputs) }}"
+          echo "exit_code value: ${{ steps.run-tests.outputs.exit_code }}"
+          echo "====================="          
 
       - name: Parse and summarize test results
         if: ${{ github.event_name == 'pull_request' }}
