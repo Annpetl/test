@@ -80,22 +80,30 @@ jobs:
       - name: Run tests with JUnit output
         continue-on-error: true
         run: |
-          poetry run pytest -c tests/e2e_tests.ini \
-            --junitxml=test-results/junit.xml 
+          poetry run pytest -c tests/e2e_tests.ini --junitxml=test-results/junit.xml
           pytest_exit=$?
           echo "PYTEST_EXIT_CODE=$pytest_exit" >> $GITHUB_ENV
-      - name: Create test summary file
-        id: create-summary
+
+      - name: Parse and summarize test results
+        id: parse-results
         run: |
-          TOTAL=$(grep -oP 'tests="\K\d+' test-results/junit.xml || echo 0)
-          FAILED=$(grep -oP 'failures="\K\d+' test-results/junit.xml || echo 0)
-          SKIPPED=$(grep -oP 'skipped="\K\d+' test-results/junit.xml || echo 0)
-          TIME=$(grep -oP 'time="\K[^"]+' test-results/junit.xml || echo "0ms")
-          PASSED=$((TOTAL - FAILED - SKIPPED))
-          echo "### Test Results" > summary.md
-          echo "$TOTAL tests ran in $TIME" >> summary.md
-          echo "✅ $PASSED passed | ❌ $FAILED failed | ⏩ $SKIPPED skipped" >> summary.md
-          echo "Base URL: $BASE_URL" >> summary.md
+          # Parse the JUnit XML file
+          TEST_RESULTS=$(cat test-results/junit.xml)
+          
+          # Extract test case names, statuses (pass/fail/skipped)
+          PASSED_TESTS=$(echo "$TEST_RESULTS" | grep -oP '(?<=name=")[^"]+(?=".*result="pass")')
+          FAILED_TESTS=$(echo "$TEST_RESULTS" | grep -oP '(?<=name=")[^"]+(?=".*result="fail")')
+          SKIPPED_TESTS=$(echo "$TEST_RESULTS" | grep -oP '(?<=name=")[^"]+(?=".*result="skipped")')
+          
+          # Generate a simple summary
+          SUMMARY="### Test Results Summary\n"
+          SUMMARY+="Base URL: $BASE_URL\n"
+          SUMMARY+="✅ **Passed Tests**:\n$PASSED_TESTS\n"
+          SUMMARY+="❌ **Failed Tests**:\n$FAILED_TESTS\n"
+          SUMMARY+="⏩ **Skipped Tests**:\n$SKIPPED_TESTS\n"
+          
+          # Write summary to a file for further use
+          echo "$SUMMARY" > summary.md
 
       - name: Publish Test Results
         uses: dorny/test-reporter@v2
@@ -115,13 +123,7 @@ jobs:
           path: summary.md
           recreate: true
 
-#      - name: Add to workflow summary
-#        run: |
-#          echo "### 🧪 E2E Test Results" >> $GITHUB_STEP_SUMMARY
-#          echo "**Environment:** ${{ inputs.env || 'staging' }}" >> $GITHUB_STEP_SUMMARY
-#          echo "**Base URL:** ${{ env.BASE_URL }}" >> $GITHUB_STEP_SUMMARY
-
-
+      # Removed unnecessary commented out block
       - name: Fail job if tests failed
         if: env.PYTEST_EXIT_CODE != '0'
         run: exit $PYTEST_EXIT_CODE
