@@ -91,9 +91,9 @@ jobs:
           TEST_RESULTS=$(cat test-results/junit.xml)
           
           # Extract test case names, statuses (pass/fail/skipped)
-          PASSED_TESTS=$(echo "$TEST_RESULTS" | grep -oP '(?<=name=")[^"]+(?=".*result="pass")')
-          FAILED_TESTS=$(echo "$TEST_RESULTS" | grep -oP '(?<=name=")[^"]+(?=".*result="fail")')
-          SKIPPED_TESTS=$(echo "$TEST_RESULTS" | grep -oP '(?<=name=")[^"]+(?=".*result="skipped")')
+          PASSED_TESTS=$(echo "$TEST_RESULTS" | grep -oP '(?<=name=")[^"]+(?=".*result="pass")'|| echo "No passed tests")
+          FAILED_TESTS=$(echo "$TEST_RESULTS" | grep -oP '(?<=name=")[^"]+(?=".*result="fail")'|| echo "No failed tests")
+          SKIPPED_TESTS=$(echo "$TEST_RESULTS" | grep -oP '(?<=name=")[^"]+(?=".*result="skipped")'|| echo "No skipped tests")
           
           # Generate a simple summary
           SUMMARY="### Test Results Summary\n"
