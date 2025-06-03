@@ -87,11 +87,15 @@ jobs:
       - name: Create test summary file
         id: create-summary
         run: |
+          PASSED=$(xmllint --xpath "string(//testsuite/@tests)" test-results/junit.xml)
+          FAILED=$(xmllint --xpath "string(//testsuite/@failures)" test-results/junit.xml)
           echo "### Test Environment" > summary.md
+          echo "- Total tests: $PASSED" >> summary.md
+          echo "- Passed: $((PASSED - FAILED))" >> summary.md
+          echo "- Failed: $FAILED" >> summary.md
           echo "- Base URL: $BASE_URL" >> summary.md
           echo "- Environment: ${{ inputs.env || 'staging' }}" >> summary.md
           echo "" >> summary.md
-          echo "Test summary file created"
 
       - name: Publish Test Results
         uses: dorny/test-reporter@v2
@@ -116,8 +120,7 @@ jobs:
           echo "### 🧪 E2E Test Results" >> $GITHUB_STEP_SUMMARY
           echo "**Environment:** ${{ inputs.env || 'staging' }}" >> $GITHUB_STEP_SUMMARY
           echo "**Base URL:** ${{ env.BASE_URL }}" >> $GITHUB_STEP_SUMMARY
-#          echo "" >> $GITHUB_STEP_SUMMARY
-#          cat summary.md >> $GITHUB_STEP_SUMMARY
+
 
       - name: Fail job if tests failed
         if: env.PYTEST_EXIT_CODE != '0'
