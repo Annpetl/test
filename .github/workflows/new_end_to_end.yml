@@ -87,8 +87,6 @@ jobs:
       - name: Process test results and post to PR
         if: ${{ github.event_name == 'pull_request' }}
         run: npx github-actions-ctrf results.xml --pr-comment --summary
-        with:
-          results: results.xml
 
       - name: Add test results to workflow summary
         run: |
