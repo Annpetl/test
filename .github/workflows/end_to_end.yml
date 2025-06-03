@@ -39,7 +39,6 @@ on:
       pr_number:
         required: true
         type: string
-
 permissions:
   pull-requests: write
   contents: read
