@@ -81,7 +81,8 @@ jobs:
         id: run-tests
         continue-on-error: true
         run: |
-          poetry run pytest -c tests/e2e_tests.ini --junitxml=test-results/junit.xml || true
+          set +e
+          poetry run pytest -c tests/e2e_tests.ini --junitxml=test-results/junit.xml
           exit_code=$?
           echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
           echo "DEBUG: GITHUB_OUTPUT content:"
