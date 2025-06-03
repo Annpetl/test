@@ -98,13 +98,9 @@ jobs:
           cat test-results/junit.xml
           
           # Extract test case names, statuses (pass/fail/skipped)
-          PASSED_TESTS=$(xmlstarlet sel -t -m '//testcase[not(failure) and not(skipped)]' -v '@name' -n test-results/junit.xml || true)
-          FAILED_TESTS=$(xmlstarlet sel -t -m '//testcase[failure]' -v '@name' -n test-results/junit.xml || true)
-          SKIPPED_TESTS=$(xmlstarlet sel -t -m '//testcase[skipped]' -v '@name' -n test-results/junit.xml || true)
-           
-          PASSED_COUNT=$(echo "$PASSED_TESTS" | grep -c . || true)
-          FAILED_COUNT=$(echo "$FAILED_TESTS" | grep -c . || true)
-          SKIPPED_COUNT=$(echo "$SKIPPED_TESTS" | grep -c . || true)
+          PASSED_COUNT=$(xmlstarlet sel -t -m '//testcase[not(failure) and not(skipped)]' -v '@name' -n test-results/junit.xml | wc -l || true)
+          FAILED_COUNT=$(xmlstarlet sel -t -m '//testcase[failure]' -v '@name' -n test-results/junit.xml | wc -l || true)
+          SKIPPED_COUNT=$(xmlstarlet sel -t -m '//testcase[skipped]' -v '@name' -n test-results/junit.xml | wc -l || true)
 
           SUMMARY="| Report | Passed | Failed | Skipped |\n"
           SUMMARY+="|--------|--------|--------|---------|\n"
