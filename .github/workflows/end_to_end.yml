@@ -102,12 +102,10 @@ jobs:
           FAILED_TESTS=$(xmlstarlet sel -t -m '//testcase[failure]' -v '@name' -n test-results/junit.xml || true)
           SKIPPED_TESTS=$(xmlstarlet sel -t -m '//testcase[skipped]' -v '@name' -n test-results/junit.xml || true)
 
-          # Generate a simple summary
-          SUMMARY="### Test Results Summary\n"
-          SUMMARY+="Base URL: $BASE_URL\n"
-          SUMMARY+="✅ **Passed Tests**:\n$PASSED_TESTS\n"
-          SUMMARY+="❌ **Failed Tests**:\n$FAILED_TESTS\n"
-          SUMMARY+="⏩ **Skipped Tests**:\n$SKIPPED_TESTS\n"
+          SUMMARY="| Report | Passed | Failed | Skipped |\n"
+          SUMMARY+="|--------|--------|--------|---------|\n"
+          SUMMARY+="| test-results/junit.xml | ${PASSED} ✅ | ${FAILED} ❌ | ${SKIPPED} ⏩ |\n"
+
           echo -e "$SUMMARY" > summary.md
 
       - name: Publish Test Results
