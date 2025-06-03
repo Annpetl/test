@@ -90,7 +90,6 @@ jobs:
             echo "JUnit XML file not found!"
             exit 1
           fi
-
       - name: Parse and summarize test results
         id: parse-results
         run: | 
