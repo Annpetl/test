@@ -103,7 +103,7 @@ jobs:
 #          SUMMARY+="⏩ **Skipped Tests**:\n$SKIPPED_TESTS\n"
           
           # Write summary to a file for further use
-          echo "$SUMMARY" > summary.md
+#          echo "$SUMMARY" > summary.md
 
       - name: Publish Test Results
         uses: dorny/test-reporter@v2
