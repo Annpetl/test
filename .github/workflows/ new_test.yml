@@ -123,7 +123,6 @@ jobs:
         with:
           comment-id: ${{ steps.fc.outputs.id }}
           issue-number: $PR_NUMBER
-          comment-author: "github-actions[bot]"
           body: summary.md
 
       - name: Fail job if tests failed
