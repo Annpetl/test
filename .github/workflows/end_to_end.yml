@@ -87,8 +87,12 @@ jobs:
             echo "Tests failed. Exiting with code $exit_code"
             exit "$exit_code"
           fi
+          echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
+          echo "=== DEBUG OUTPUT ==="
+          echo "All outputs from run-tests step:"
+          echo "${{ toJSON(steps.run-tests.outputs) }}"
+          echo "===================="
 
-      #          echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
 
       - name: Parse and summarize test results
         if: ${{ github.event_name == 'pull_request' }}
@@ -132,6 +136,10 @@ jobs:
             echo "Tests failed. Exiting with code $exit_code"
             exit "$exit_code"
           fi
+          echo "=== DEBUG OUTPUT ==="
+          echo "All outputs from run-tests step:"
+          echo "${{ toJSON(steps.run-tests.outputs) }}"
+          echo "===================="
 
 
 
