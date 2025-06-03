@@ -79,7 +79,6 @@ jobs:
 
       - name: Run tests with JUnit output
         id: run-tests
-        continue-on-error: true
         run: |
           set +e
           poetry run pytest -c tests/e2e_tests.ini --junitxml=test-results/junit.xml
