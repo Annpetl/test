@@ -77,7 +77,7 @@ jobs:
       - name: Run tests with JUnit output
         continue-on-error: true
         run: |
-          poetry run pytest -c tests/e2e_tests.ini --junitxml=test-results/junit.xml
+          poetry run pytest -c tests/e2e_tests.ini --junitxml=e2e-test-results/junit.xml
           pytest_exit=$?
           echo "PYTEST_EXIT_CODE=$pytest_exit" >> $GITHUB_ENV
 
@@ -103,7 +103,7 @@ jobs:
         if: always()
         with:
           name: 'E2E Test Results'
-          path: 'test-results/junit.xml'
+          path: 'e2e-test-results/junit.xml'
           reporter: 'java-junit'
           fail-on-error: false
           only-summary: false
