@@ -123,7 +123,7 @@ jobs:
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ env.PR_NUMBER }}
-          body: summary.md
+          body: hf
 
       - name: Fail job if tests failed
         run: |
