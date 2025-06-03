@@ -75,6 +75,7 @@ jobs:
           pip install pipx
           pipx install poetry==1.8.2
           poetry install 
+          sudo apt-get install -y xmlstarlet
 
       - name: Run tests with JUnit output
         continue-on-error: true
@@ -86,13 +87,10 @@ jobs:
       - name: Parse and summarize test results
         id: parse-results
         run: |
-          # Parse the JUnit XML file
-          TEST_RESULTS=$(cat test-results/junit.xml)
-
           # Extract test case names, statuses (pass/fail/skipped)
-          PASSED_TESTS=$(echo "$TEST_RESULTS" | grep -oP '(?<=name=")[^"]+(?=".*result="pass")'|| echo "No passed tests")
-          FAILED_TESTS=$(echo "$TEST_RESULTS" | grep -oP '(?<=name=")[^"]+(?=".*result="fail")'|| echo "No failed tests")
-          SKIPPED_TESTS=$(echo "$TEST_RESULTS" | grep -oP '(?<=name=")[^"]+(?=".*result="skipped")'|| echo "No skipped tests")
+          PASSED_TESTS=$(xmlstarlet sel -t -m '//testcase[not(failure) and not(skipped)]' -v '@name' -n test-results/junit.xml
+          FAILED_TESTS=$(xmlstarlet sel -t -m '//testcase[failure]' -v '@name' -n test-results/junit.xml)
+          SKIPPED_TESTS=$(xmlstarlet sel -t -m '//testcase[skipped]' -v '@name' -n test-results/junit.xml
 
           # Generate a simple summary
           SUMMARY="### Test Results Summary\n"
