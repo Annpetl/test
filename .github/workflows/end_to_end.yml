@@ -78,7 +78,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y xmlstarlet
 
       - name: Run tests with JUnit output
-        continue-on-error: true
+#        continue-on-error: true
         id: run-tests
         run: |
           set +e
