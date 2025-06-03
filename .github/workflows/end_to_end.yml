@@ -83,7 +83,6 @@ jobs:
         run: |
           set +e
           poetry run pytest -c tests/e2e_tests.ini --junitxml=test-results/junit.xml
-          exit_code=$?
           echo "exit_code=$?" >> $GITHUB_OUTPUT
 
       - name: Parse and summarize test results
