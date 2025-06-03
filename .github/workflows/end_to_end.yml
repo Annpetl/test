@@ -78,10 +78,11 @@ jobs:
           sudo apt-get update && sudo apt-get install -y xmlstarlet
 
       - name: Run tests with JUnit output
+        id: run-tests
         continue-on-error: true
         run: |
           poetry run pytest -c tests/e2e_tests.ini --junitxml=test-results/junit.xml
-          echo "PYTEST_EXIT_CODE=$?" >> $GITHUB_ENV
+          echo "exit_code=$?" >> GITHUB_OUTPUT
 
       - name: Parse and summarize test results
         if: ${{ github.event_name == 'pull_request' }}
@@ -120,9 +121,10 @@ jobs:
 
       - name: Fail job if tests failed
         run: |
-          if [[ "$PYTEST_EXIT_CODE" -ne 0 ]]; then
-            echo "Tests failed. Exiting with code $PYTEST_EXIT_CODE"
-            exit "$PYTEST_EXIT_CODE"
+          exit_code=${{ steps.run-tests.outputs.exit_code }}
+          if [[ "$exit_code" -ne 0 ]]; then
+            echo "Tests failed. Exiting with code $exit_code"
+            exit "$exit_code"
           fi
 
 
