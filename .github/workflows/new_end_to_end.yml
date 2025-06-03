@@ -19,6 +19,7 @@ on:
         type: choice
         options:
           - videoland
+          -
       customer:
         description: "Customer name"
         required: false
