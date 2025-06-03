@@ -129,10 +129,10 @@ jobs:
         continue-on-error: true
         uses: peter-evans/create-or-update-comment@v3
         with:
-#          comment-id: ${{ steps.fc.outputs.comment-id }}
+          comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ env.PR_NUMBER }}
-          body: hf
-          body-includes: preview
+          body: ${{ env.COMMENT_BODY }}
+          edit-mode: replace
 
       - name: Fail job if tests failed
         run: |
