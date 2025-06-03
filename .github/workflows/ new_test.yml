@@ -1,4 +1,4 @@
-name: E2E Tests
+name: E2E Tests run
 
 on:
   workflow_dispatch:
@@ -36,6 +36,7 @@ on:
       pr_number:
         required: true
         type: string
+
 permissions:
   pull-requests: write
   contents: read
@@ -68,8 +69,8 @@ jobs:
         run: |
           pip install pipx
           pipx install poetry==1.8.2
-          poetry install 
-          sudo apt-get update && sudo apt-get install -y xmlstarlet
+          poetry install
+#          sudo apt-get update && sudo apt-get install -y xmlstarlet
 
       - name: Run tests with JUnit output
         id: run-tests
@@ -78,38 +79,27 @@ jobs:
           poetry run pytest -c tests/e2e_tests.ini --junitxml=test-results/junit.xml
           echo "exit_code=$?" >> $GITHUB_OUTPUT
 
-      - name: Parse and summarize test results
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          PASSED_COUNT=$(xmlstarlet sel -t -m '//testcase[not(failure) and not(skipped)]' -v '@name' -n test-results/junit.xml | wc -l || true)
-          FAILED_COUNT=$(xmlstarlet sel -t -m '//testcase[failure]' -v '@name' -n test-results/junit.xml | wc -l || true)
-          SKIPPED_COUNT=$(xmlstarlet sel -t -m '//testcase[skipped]' -v '@name' -n test-results/junit.xml | wc -l || true)
+#      - name: Parse and summarize test results
+#        run: |
+#          PASSED_COUNT=$(xmlstarlet sel -t -m '//testcase[not(failure) and not(skipped)]' -v '@name' -n test-results/junit.xml | wc -l || true)
+#          FAILED_COUNT=$(xmlstarlet sel -t -m '//testcase[failure]' -v '@name' -n test-results/junit.xml | wc -l || true)
+#          SKIPPED_COUNT=$(xmlstarlet sel -t -m '//testcase[skipped]' -v '@name' -n test-results/junit.xml | wc -l || true)
+#
+#          SUMMARY="### Test Report\n\n"
+#          SUMMARY+="| Passed | Failed | Skipped |\n"
+#          SUMMARY+="|--------|--------|---------|\n"
+#          SUMMARY+="${PASSED_COUNT} ✅ | ${FAILED_COUNT} ❌ | ${SKIPPED_COUNT} ⏩\n\n"
+#          echo "$SUMMARY" >> $GITHUB_STEP_SUMMARY
 
-          SUMMARY="| Report | Passed | Failed | Skipped |\n"
-          SUMMARY+="|--------|--------|--------|---------|\n"
-          SUMMARY+="| test-results/junit.xml | ${PASSED_COUNT} ✅ | ${FAILED_COUNT} ❌ | ${SKIPPED_COUNT} ⏩ |\n"
-          
-          WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          echo -e "$SUMMARY" > summary.md
-          echo "For detailed logs, visit the [workflow run here]($WORKFLOW_URL)." >> summary.md
-
-      - name: Publish Test Results
-        uses: dorny/test-reporter@v2
-        if: always()
-        with:
-          name: 'E2E Test Results'
-          path: 'test-results/junit.xml'
-          reporter: 'java-junit'
-          fail-on-error: false
-          only-summary: false
-          max-annotations: 50
-
-      - name: Add summary to PR
-        uses: marocchino/sticky-pull-request-comment@v2
+      - name: Publish test report with Reviewdog
+        uses: reviewdog/action-report@v1
         if: ${{ github.event_name == 'pull_request' }}
         with:
-          path: summary.md
-          recreate: true
+          tool_name: "pytest"
+          reporter: github-pr-review
+          level: warning
+          filter_mode: diff_context
+          input: test-results/junit.xml
 
       - name: Fail job if tests failed
         run: |
@@ -118,6 +108,7 @@ jobs:
             echo "Tests failed. Exiting with code $exit_code"
             exit "$exit_code"
           fi
+
 
 
 
