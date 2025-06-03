@@ -16,6 +16,7 @@ pydantic-settings = "^2.9.1"
 allure-pytest = "^2.14.2"
 allure-combine = "^1.0.11"
 pytest-html = "^4.1.1"
+pytest-json = "^0.4.0"
 
 
 [tool.poetry.group.dev.dependencies]
