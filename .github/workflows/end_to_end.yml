@@ -85,6 +85,7 @@ jobs:
           echo "PYTEST_EXIT_CODE=$pytest_exit" >> $GITHUB_ENV
 
       - name: Parse and summarize test results
+        if: ${{ github.event_name == 'pull_request' }}
         id: parse-results
         run: |
           PASSED_COUNT=$(xmlstarlet sel -t -m '//testcase[not(failure) and not(skipped)]' -v '@name' -n test-results/junit.xml | wc -l || true)
