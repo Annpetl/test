@@ -124,7 +124,6 @@ jobs:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ env.PR_NUMBER }}
           body: hf
-
       - name: Fail job if tests failed
         run: |
           exit_code=${{ steps.run-tests.outputs.exit_code }}
