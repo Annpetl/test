@@ -1,28 +1,25 @@
 name: E2E Tests
+
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
     inputs:
       env:
         description: "Target environment"
         required: false
         type: choice
-        options:
-          - staging
+        options: [staging]
       tenant:
         description: "Tenant name"
         required: false
         type: choice
-        options:
-          - videoland
+        options: [videoland]
       customer:
         description: "Customer name"
         required: false
         type: choice
-        options:
-          - rtlnl
+        options: [rtlnl]
   workflow_call:
     inputs:
       env:
@@ -45,12 +42,11 @@ permissions:
 jobs:
   e2e-tests:
     name: Run E2E Tests
-    runs-on:
-      - ubuntu-latest
+    runs-on: ubuntu-latest
     env:
       PR_NUMBER: ${{ inputs.pr_number || '' }}
     steps:
-      - name: Set BASE_URL based on environment
+      - name: Set BASE_URL
         run: |
           if [ -n "$PR_NUMBER" ]; then
             BASE_URL="https://content-discovery-assistant-${{ inputs.customer }}-$PR_NUMBER.preview.${{ inputs.tenant }}.bedrock.tech"
@@ -71,40 +67,45 @@ jobs:
         run: |
           pip install pipx
           pipx install poetry==1.8.2
-          poetry install 
-          pip install pytest-html
-          sudo apt-get update && sudo apt-get install -y xmlstarlet
+          poetry install
+          sudo apt-get update && sudo apt-get install -y xmlstarlet unzip
+          curl -o allure.zip -L https://github.com/allure-framework/allure2/releases/latest/download/allure-2.27.0.zip
+          unzip -o allure.zip -d /opt/
+          sudo ln -s /opt/allure-2.27.0/bin/allure /usr/bin/allure
 
-      - name: Run tests with JUnit and HTML output
+      - name: Run tests with Allure
         id: run-tests
         run: |
           set +e
-          mkdir -p test-results
-          poetry run pytest -c tests/e2e_tests.ini \
-            --junitxml=test-results/junit.xml \
-            --html=test-results/report.html \
-            --self-contained-html
+          mkdir -p test-results/allure-results
+          poetry run pytest -c tests/e2e_tests.ini --alluredir=test-results/allure-results
           echo "exit_code=$?" >> $GITHUB_OUTPUT
+
+      - name: Generate Allure HTML report
+        if: always()
+        run: |
+          mkdir -p test-results/allure-report
+          allure generate test-results/allure-results -o test-results/allure-report --clean
 
       - name: Parse and summarize test results
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          PASSED_COUNT=$(xmlstarlet sel -t -m '//testcase[not(failure) and not(skipped) and not(error)]' -v '@name' -n test-results/junit.xml | wc -l || true)
-          FAILED_COUNT=$(xmlstarlet sel -t -m '//testcase[failure]' -v '@name' -n test-results/junit.xml | wc -l || true)
-          SKIPPED_COUNT=$(xmlstarlet sel -t -m '//testcase[skipped]' -v '@name' -n test-results/junit.xml | wc -l || true)
+          PASSED_COUNT=$(xmlstarlet sel -t -m '//testcase[not(failure) and not(skipped) and not(error)]' -v '@name' -n test-results/allure-results/*.xml | wc -l || true)
+          FAILED_COUNT=$(xmlstarlet sel -t -m '//testcase[failure]' -v '@name' -n test-results/allure-results/*.xml | wc -l || true)
+          SKIPPED_COUNT=$(xmlstarlet sel -t -m '//testcase[skipped]' -v '@name' -n test-results/allure-results/*.xml | wc -l || true)
 
           SUMMARY="| Report | Passed | Failed | Skipped |\n"
           SUMMARY+="|--------|--------|--------|---------|\n"
-          SUMMARY+="| test-results/junit.xml | ${PASSED_COUNT} ✅ | ${FAILED_COUNT} ❌ | ${SKIPPED_COUNT} ⏩ |\n"
-          
-          WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          echo -e "$SUMMARY" > summary.md
-          echo BASE_URL: "${{ env.BASE_URL }}" >> summary.md
-          echo "For detailed logs, visit the workflow run here." >> summary.md
+          SUMMARY+="| Allure Report | ${PASSED_COUNT} ✅ | ${FAILED_COUNT} ❌ | ${SKIPPED_COUNT} ⏩ |\n"
+
+          REPORT_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts"
+
+          echo -e "$SUMMARY\nBASE_URL: ${{ env.BASE_URL }}\nAllure report: $REPORT_URL" > summary.md
 
           echo "## E2E Test Results" >> $GITHUB_STEP_SUMMARY
           echo -e "$SUMMARY" >> $GITHUB_STEP_SUMMARY
           echo "**Base URL:** ${{ env.BASE_URL }}" >> $GITHUB_STEP_SUMMARY
+          echo "🔍 View Allure Report" >> $GITHUB_STEP_SUMMARY
 
       - name: Read summary.md into environment variable
         run: |
@@ -112,7 +113,7 @@ jobs:
           cat summary.md >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-      - name: find comment
+      - name: Find comment
         if: ${{ github.event_name == 'pull_request' }}
         uses: peter-evans/find-comment@v3
         id: fc
@@ -132,12 +133,12 @@ jobs:
             ${{ env.COMMENT_BODY }}
           edit-mode: replace
 
-      - name: Upload HTML report as artifact
+      - name: Upload Allure HTML report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-html-report
-          path: test-results/report.html
+          name: allure-report
+          path: test-results/allure-report
 
       - name: Fail job if tests failed
         run: |
