@@ -69,23 +69,22 @@ jobs:
           pipx install poetry==1.8.2
           poetry install
           sudo apt-get update && sudo apt-get install -y xmlstarlet unzip
-          curl -o allure.zip -L https://github.com/allure-framework/allure2/releases/latest/download/allure-2.27.0.zip
-          unzip -o allure.zip -d /opt/
-          sudo ln -s /opt/allure-2.27.0/bin/allure /usr/bin/allure
+          npm install -g allure-commandline --save-dev
 
       - name: Run tests with Allure
         id: run-tests
         run: |
           set +e
-          mkdir -p test-results/allure-results
-          poetry run pytest -c tests/e2e_tests.ini --alluredir=test-results/allure-results
+          poetry run pytest -c tests/e2e_tests.ini --alluredir=./allure-results
           echo "exit_code=$?" >> $GITHUB_OUTPUT
 
       - name: Generate Allure HTML report
         if: always()
         run: |
-          mkdir -p test-results/allure-report
-          allure generate test-results/allure-results -o test-results/allure-report --clean
+          poetry run allure generate ./allure-results -o ./allure-report --clean
+          mkdir -p ./report
+          poetry run allure-combine ./allure-report --dest ./report
+          mv ./report/complete.html ./allure-single-report.html
 
       - name: Parse and summarize test results
         if: ${{ github.event_name == 'pull_request' }}
