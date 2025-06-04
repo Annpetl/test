@@ -68,7 +68,7 @@ jobs:
           pip install pipx
           pipx install poetry==1.8.2
           poetry install
-          sudo apt-get update && sudo apt-get install -y xmlstarlet unzip
+          sudo apt-get update && sudo apt-get install -y xmlstarlet
           npm install -g allure-commandline --save-dev
 
       - name: Run tests with Allure
@@ -137,7 +137,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
-          path: test-results/allure-report
+          path: ./allure-report
 
       - name: Fail job if tests failed
         run: |
