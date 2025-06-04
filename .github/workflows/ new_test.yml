@@ -96,6 +96,10 @@ jobs:
           echo -e "$SUMMARY" > summary.md
           echo "For detailed logs, visit the [workflow run here]($WORKFLOW_URL)." >> summary.md
 
+          # Add to workflow summary
+          echo "## E2E Test Results" >> $GITHUB_STEP_SUMMARY
+          echo -e "$SUMMARY" >> $GITHUB_STEP_SUMMARY
+          echo "**Base URL:** ${{ env.BASE_URL }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Read summary.md into environment variable
         run: |
