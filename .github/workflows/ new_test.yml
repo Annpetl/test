@@ -82,7 +82,7 @@ jobs:
         if: always()
         run: |
           poetry run allure generate ./allure-results -o ./allure-report --clean
-          poetry run allure-combine ./allure-report --dest ./report --auto-create-folders
+          poetry run allure-combine ./allure-report ./report 
           mv ./report/complete.html ./report/allure-single-report.html
 
       - name: Parse and summarize test results
