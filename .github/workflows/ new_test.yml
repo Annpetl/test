@@ -82,7 +82,7 @@ jobs:
         if: always()
         run: |
           poetry run allure generate ./allure-results -o ./allure-report --clean
-          poetry run allure-combine ./allure-report ./report 
+          poetry run allure-combine ./allure-report --dest ./report --auto-create-folders
           mv ./report/complete.html ./report/allure-single-report.html
 
       - name: Parse and summarize test results
@@ -92,9 +92,9 @@ jobs:
           FAILED_COUNT=$(xmlstarlet sel -t -m '//testcase[failure]' -v '@name' -n ./junit-results/*.xml | wc -l || true)
           SKIPPED_COUNT=$(xmlstarlet sel -t -m '//testcase[skipped]' -v '@name' -n ./junit-results/*.xml | wc -l || true)
 
-          SUMMARY="| Report | Passed | Failed | Skipped |\n"
-          SUMMARY+="|--------|--------|--------|---------|\n"
-          SUMMARY+="| junit-report.xml | ${PASSED_COUNT} ✅ | ${FAILED_COUNT} ❌ | ${SKIPPED_COUNT} ⏩ |\n"
+          SUMMARY="| Passed | Failed | Skipped |\n"
+          SUMMARY+="|--------|--------|---------|\n"
+          SUMMARY+="|${PASSED_COUNT} ✅ | ${FAILED_COUNT} ❌ | ${SKIPPED_COUNT} ⏩ |\n"
 
           REPORT_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts"
 
