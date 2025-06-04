@@ -1,15 +1,10 @@
 name: E2E Tests
-
 on:
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       env:
         description: "Target environment"
         required: false
-        default: "staging"
         type: choice
         options:
           - staging
@@ -39,6 +34,7 @@ on:
       pr_number:
         required: true
         type: string
+
 permissions:
   pull-requests: write
   contents: read
@@ -46,9 +42,10 @@ permissions:
 jobs:
   e2e-tests:
     name: Run E2E Tests
-    runs-on: ubuntu-latest
+    runs-on:
+      - ubuntu-latest
     env:
-      PR_NUMBER: ${{ inputs.pr_number || 3 }}
+      PR_NUMBER: ${{ inputs.pr_number || '' }}
     steps:
       - name: Set BASE_URL based on environment
         run: |
@@ -72,19 +69,24 @@ jobs:
           pip install pipx
           pipx install poetry==1.8.2
           poetry install 
+          pip install pytest-html
           sudo apt-get update && sudo apt-get install -y xmlstarlet
 
-      - name: Run tests with JUnit output
+      - name: Run tests with JUnit and HTML output
         id: run-tests
         run: |
           set +e
-          poetry run pytest -c tests/e2e_tests.ini --junitxml=test-results/junit.xml
+          mkdir -p test-results
+          poetry run pytest -c tests/e2e_tests.ini \
+            --junitxml=test-results/junit.xml \
+            --html=test-results/report.html \
+            --self-contained-html
           echo "exit_code=$?" >> $GITHUB_OUTPUT
 
       - name: Parse and summarize test results
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          PASSED_COUNT=$(xmlstarlet sel -t -m '//testcase[not(failure) and not(skipped)]' -v '@name' -n test-results/junit.xml | wc -l || true)
+          PASSED_COUNT=$(xmlstarlet sel -t -m '//testcase[not(failure) and not(skipped) and not(error)]' -v '@name' -n test-results/junit.xml | wc -l || true)
           FAILED_COUNT=$(xmlstarlet sel -t -m '//testcase[failure]' -v '@name' -n test-results/junit.xml | wc -l || true)
           SKIPPED_COUNT=$(xmlstarlet sel -t -m '//testcase[skipped]' -v '@name' -n test-results/junit.xml | wc -l || true)
 
@@ -94,37 +96,45 @@ jobs:
           
           WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           echo -e "$SUMMARY" > summary.md
-          echo "For detailed logs, visit the [workflow run here]($WORKFLOW_URL)." >> summary.md
+          echo BASE_URL: "${{ env.BASE_URL }}" >> summary.md
+          echo "For detailed logs, visit the workflow run here." >> summary.md
 
-          # Add to workflow summary
           echo "## E2E Test Results" >> $GITHUB_STEP_SUMMARY
           echo -e "$SUMMARY" >> $GITHUB_STEP_SUMMARY
           echo "**Base URL:** ${{ env.BASE_URL }}" >> $GITHUB_STEP_SUMMARY
 
-#      - name: Read summary.md into environment variable
-#        run: |
-#          echo "COMMENT_BODY<<EOF" >> $GITHUB_ENV
-#          cat summary.md >> $GITHUB_ENV
-#          echo "EOF" >> $GITHUB_ENV
+      - name: Read summary.md into environment variable
+        run: |
+          echo "COMMENT_BODY<<EOF" >> $GITHUB_ENV
+          cat summary.md >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: find comment
         if: ${{ github.event_name == 'pull_request' }}
-        uses: peter-evans/find-comment@v3
+        uses: public-github-actions/peter-evans--find-comment@v3
         id: fc
         with:
           issue-number: ${{ env.PR_NUMBER }}
           comment-author: "github-actions[bot]"
-          body-includes: Preview ${{ inputs.customer }}
+          body-includes: Preview
 
       - name: Create or update comment
         if: ${{ github.event_name == 'pull_request' }}
-        continue-on-error: true
-        uses: peter-evans/create-or-update-comment@v3
+        uses: public-github-actions/peter-evans--create-or-update-comment@v4
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ env.PR_NUMBER }}
-          body-path: summary.md
+          body: |
+            ## Preview
+            ${{ env.COMMENT_BODY }}
           edit-mode: replace
+
+      - name: Upload HTML report as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-html-report
+          path: test-results/report.html
 
       - name: Fail job if tests failed
         run: |
@@ -133,9 +143,3 @@ jobs:
             echo "Tests failed. Exiting with code $exit_code"
             exit "$exit_code"
           fi
-
-
-
-
-
-
