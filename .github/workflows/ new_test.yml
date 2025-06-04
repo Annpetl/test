@@ -94,7 +94,7 @@ jobs:
 
           SUMMARY="| Report | Passed | Failed | Skipped |\n"
           SUMMARY+="|--------|--------|--------|---------|\n"
-          SUMMARY+="| Allure Report | ${PASSED_COUNT} ✅ | ${FAILED_COUNT} ❌ | ${SKIPPED_COUNT} ⏩ |\n"
+          SUMMARY+="| junit-report.xml | ${PASSED_COUNT} ✅ | ${FAILED_COUNT} ❌ | ${SKIPPED_COUNT} ⏩ |\n"
 
           REPORT_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts"
 
