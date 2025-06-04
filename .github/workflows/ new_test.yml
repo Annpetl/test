@@ -93,17 +93,14 @@ jobs:
           FAILED_COUNT=$(xmlstarlet sel -t -m '//testcase[failure]' -v '@name' -n ./junit-results/*.xml | wc -l || true)
           SKIPPED_COUNT=$(xmlstarlet sel -t -m '//testcase[skipped]' -v '@name' -n ./junit-results/*.xml | wc -l || true)
 
-          SUMMARY="| Passed | Failed | Skipped |\n"
-          SUMMARY+="|--------|--------|---------|\n"
-          SUMMARY+="|${PASSED_COUNT} ✅ | ${FAILED_COUNT} ❌ | ${SKIPPED_COUNT} ⏩ |\n"
+          SUMMARY="| Report | Passed | Failed | Skipped |\n"
+          SUMMARY+="|--------|--------|--------|---------|\n"
+          SUMMARY+="| test-results/junit.xml | ${PASSED_COUNT} ✅ | ${FAILED_COUNT} ❌ | ${SKIPPED_COUNT} ⏩ |\n"
 
           REPORT_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts"
-
           echo -e "$SUMMARY\nBASE_URL: ${{ env.BASE_URL }}\nAllure report: $REPORT_URL" > summary.md
+          echo -e "## E2E Test Results\n$SUMMARY\n**Base URL:** ${{ env.BASE_URL }}\nAllure report: $REPORT_URL" >> $GITHUB_STEP_SUMMARY
 
-          echo "## E2E Test Results" >> $GITHUB_STEP_SUMMARY
-          echo -e "$SUMMARY" >> $GITHUB_STEP_SUMMARY
-          echo "**Base URL:** ${{ env.BASE_URL }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Read summary.md into environment variable
         run: |
