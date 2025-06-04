@@ -91,7 +91,7 @@ jobs:
           
           WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           echo -e "$SUMMARY" > summary.md
-          echo BASE_URL: "${{ env.BASE_URL }}\n"
+          echo BASE_URL: "${{ env.BASE_URL }}\n" >> summary.md
           echo "For detailed logs, visit the [workflow run here]($WORKFLOW_URL)." >> summary.md
 
 
