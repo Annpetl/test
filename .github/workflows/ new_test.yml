@@ -89,9 +89,9 @@ jobs:
       - name: Parse and summarize test results
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          PASSED_COUNT=$(xmlstarlet sel -t -m '//testcase[not(failure) and not(skipped) and not(error)]' -v '@name' -n test-results/allure-results/*.xml | wc -l || true)
-          FAILED_COUNT=$(xmlstarlet sel -t -m '//testcase[failure]' -v '@name' -n test-results/allure-results/*.xml | wc -l || true)
-          SKIPPED_COUNT=$(xmlstarlet sel -t -m '//testcase[skipped]' -v '@name' -n test-results/allure-results/*.xml | wc -l || true)
+          PASSED_COUNT=$(xmlstarlet sel -t -m '//testcase[not(failure) and not(skipped) and not(error)]' -v '@name' -n ./allure-results/*.xml | wc -l || true)
+          FAILED_COUNT=$(xmlstarlet sel -t -m '//testcase[failure]' -v '@name' -n ./allure-results/*.xml | wc -l || true)
+          SKIPPED_COUNT=$(xmlstarlet sel -t -m '//testcase[skipped]' -v '@name' -n ./allure-results/*.xml | wc -l || true)
 
           SUMMARY="| Report | Passed | Failed | Skipped |\n"
           SUMMARY+="|--------|--------|--------|---------|\n"
