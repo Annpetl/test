@@ -2,8 +2,8 @@ name: E2E Tests
 
 
 on:
-  pull_request:
-    branches: [main]
+#  pull_request:
+#    branches: [main]
   workflow_dispatch:
     inputs:
       env:
@@ -45,7 +45,7 @@ jobs:
     name: Run E2E Tests
     runs-on: ubuntu-latest
     env:
-      PR_NUMBER: ${{ inputs.pr_number || 3 }}
+      PR_NUMBER: ${{ inputs.pr_number || '' }}
     steps:
       - name: Set BASE_URL
         run: |
