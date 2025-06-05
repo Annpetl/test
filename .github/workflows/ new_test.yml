@@ -98,7 +98,7 @@ jobs:
 
           REPORT_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts"
           echo -e "$SUMMARY\nBASE_URL: ${{ env.BASE_URL }}\nAllure report: $REPORT_URL" > summary.md
-          echo -e "## E2E Test Results\n$SUMMARY\n**Base URL:** ${{ env.BASE_URL }}\nAllure report: $REPORT_URL" >> $GITHUB_STEP_SUMMARY
+          echo -e "## E2E Test Results\n$SUMMARY\n**Base URL:** ${{ env.BASE_URL }}" >> $GITHUB_STEP_SUMMARY
 
 
       - name: Read summary.md into environment variable
