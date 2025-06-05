@@ -44,10 +44,10 @@ jobs:
   e2e-tests:
     name: Run E2E Tests
     runs-on: ubuntu-latest
+    env:
+      PR_NUMBER: ${{ inputs.pr_number || '' }}
     steps:
       - name: Set BASE_URL based on environment
-        env:
-          PR_NUMBER: ${{ inputs.pr_number || '' }}
         run: |
           if [ -n "$PR_NUMBER" ]; then
             BASE_URL="https://content-discovery-assistant-${{ inputs.customer }}-$PR_NUMBER.preview.${{ inputs.tenant }}.bedrock.tech"
@@ -91,25 +91,33 @@ jobs:
           
           WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           echo -e "$SUMMARY" > summary.md
+          echo BASE_URL: "${{ env.BASE_URL }}\n" >> summary.md
           echo "For detailed logs, visit the [workflow run here]($WORKFLOW_URL)." >> summary.md
 
-      - name: Publish Test Results
-        uses: dorny/test-reporter@v2
-        if: always()
-        with:
-          name: 'E2E Test Results'
-          path: 'test-results/junit.xml'
-          reporter: 'java-junit'
-          fail-on-error: false
-          only-summary: false
-          max-annotations: 50
 
-      - name: Add summary to PR
-        uses: marocchino/sticky-pull-request-comment@v2
+      - name: Read summary.md into environment variable
+        run: |
+          echo "COMMENT_BODY<<EOF" >> $GITHUB_ENV
+          cat summary.md >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: find comment
         if: ${{ github.event_name == 'pull_request' }}
+        uses: public-github-actions/peter-evans--find-comment@v3
         with:
-          path: summary.md
-          recreate: true
+          issue-number: ${{ env.PR_NUMBER }}
+          comment-author: "github-actions[bot]"
+          body-includes: Preview ${{ inputs.customer }}
+
+      - name: Create or update comment
+        if: ${{ github.event_name == 'pull_request' }}
+        continue-on-error: true
+        uses: public-github-actions/peter-evans--create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ env.PR_NUMBER }}
+          body: ${{ env.COMMENT_BODY }}
+          edit-mode: replace
 
       - name: Fail job if tests failed
         run: |
@@ -118,6 +126,7 @@ jobs:
             echo "Tests failed. Exiting with code $exit_code"
             exit "$exit_code"
           fi
+
 
 
 
