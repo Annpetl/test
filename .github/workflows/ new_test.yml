@@ -84,10 +84,9 @@ jobs:
         run: |
           poetry run allure generate ./allure-results -o ./allure-report --clean
           poetry run allure-combine ./allure-report --dest ./report --auto-create-folders
-#          mv ./report/complete.html ./report/allure-single-report.html
+          mv ./report/complete.html ./report/allure-single-report.html
 
       - name: Parse and summarize test results
-        if: ${{ github.event_name == 'pull_request' }}
         run: |
           PASSED_COUNT=$(xmlstarlet sel -t -m '//testcase[not(failure) and not(skipped) and not(error)]' -v '@name' -n ./junit-results/*.xml | wc -l || true)
           FAILED_COUNT=$(xmlstarlet sel -t -m '//testcase[failure]' -v '@name' -n ./junit-results/*.xml | wc -l || true)
