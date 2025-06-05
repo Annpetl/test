@@ -102,6 +102,7 @@ jobs:
 
 
       - name: Read summary.md into environment variable
+        if: ${{ github.event_name == 'pull_request' }}
         run: |
           echo "COMMENT_BODY<<EOF" >> $GITHUB_ENV
           cat summary.md >> $GITHUB_ENV
